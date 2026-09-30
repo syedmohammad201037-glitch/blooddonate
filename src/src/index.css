@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@layer base {
+  html, body {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  body {
+    font-family: 'Open Sans', system-ui, -apple-system, sans-serif;
+    font-weight: 500;
+    color: #2d3748;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+  }
+}
+
+.font-heading {
+  font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+}
+
+.font-medium-500 {
+  font-weight: 500;
+}
+
+.font-bold-700 {
+  font-weight: 700;
+}
+
+.font-arabic-ayat {
+  font-family: 'Scheherazade New', 'Noto Naskh Arabic', 'Amiri', serif;
+  font-weight: 700;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+}
+
+.font-urdu {
+  font-family: 'Noto Nastaliq Urdu', 'Scheherazade New', 'Noto Naskh Arabic', serif;
+  line-height: 2;
+  letter-spacing: 0.01em;
+}
+
+/* Smooth Fade In Keyframes */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+.animate-subtle-pulse {
+  animation: pulseSubtle 3s ease-in-out infinite;
+}
+
+/* Print Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-slip, #printable-slip * {
+    visibility: visible;
+  }
+  #printable-slip {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 24px;
+    box-shadow: none !important;
+    border: 2px solid #ea3a3c !important;
+    background: #ffffff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

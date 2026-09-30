@@ -1,0 +1,210 @@
+{
+  "entities": {
+    "Donor": {
+      "title": "Donor",
+      "description": "Full donor registration record containing medical and contact details. Read/write restricted to authenticated administrators.",
+      "type": "object",
+      "properties": {
+        "tokenNumber": {
+          "type": "string",
+          "pattern": "^BDC-[A-Z0-9]{6,10}$",
+          "minLength": 7,
+          "maxLength": 20,
+          "description": "Unique collision-safe registration token"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "description": "Full name of the voluntary blood donor"
+        },
+        "phone": {
+          "type": "string",
+          "pattern": "^03[0-9]{9}$",
+          "minLength": 11,
+          "maxLength": 11,
+          "description": "Pakistani 11-digit mobile/WhatsApp number"
+        },
+        "cnic": {
+          "type": "string",
+          "pattern": "^[0-9]{5}-[0-9]{7}-[0-9]{1}$",
+          "minLength": 15,
+          "maxLength": 15,
+          "description": "Pakistani 13-digit CNIC with dashes"
+        },
+        "bloodGroup": {
+          "type": "string",
+          "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"],
+          "description": "Verified or declared blood group"
+        },
+        "address": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 250,
+          "description": "Residential area or scheme 33 sector"
+        },
+        "donorType": {
+          "type": "string",
+          "enum": ["regular", "walkin"],
+          "description": "Type of donor registration: regular (online) or walkin (camp reception desk)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Registered", "Confirmed", "Donated", "Deferred"],
+          "description": "Current status in the camp workflow"
+        },
+        "registeredAt": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Human-readable registration time string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of record creation"
+        },
+        "customFields": {
+          "type": "object",
+          "description": "Dynamic key-value attributes configured by camp administrators"
+        }
+      },
+      "required": ["tokenNumber", "name", "phone", "bloodGroup", "address", "status"]
+    },
+    "PublicToken": {
+      "title": "PublicToken",
+      "description": "Safe, sanitized token status record accessible for public tracking without leaking CNIC, address, or phone number.",
+      "type": "object",
+      "properties": {
+        "tokenNumber": {
+          "type": "string",
+          "pattern": "^BDC-[A-Z0-9]{6,10}$",
+          "minLength": 7,
+          "maxLength": 20,
+          "description": "Unique registration token matching donor record"
+        },
+        "maskedName": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Masked donor name (e.g. M******* U****) for privacy preservation"
+        },
+        "bloodGroup": {
+          "type": "string",
+          "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"],
+          "description": "Blood group for camp preparation"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Registered", "Confirmed", "Donated", "Deferred"],
+          "description": "Live camp status (Registered, Confirmed, Donated, Deferred)"
+        },
+        "campDate": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Scheduled camp date and operating hours"
+        },
+        "venue": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Camp location / scheme 33 venue"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp"
+        }
+      },
+      "required": ["tokenNumber", "maskedName", "bloodGroup", "status"]
+    },
+    "RegisteredCnic": {
+      "title": "RegisteredCnic",
+      "description": "Privacy-safe unique index mapping CNIC to token number to prevent duplicate registrations without exposing donor identity.",
+      "type": "object",
+      "properties": {
+        "tokenNumber": {
+          "type": "string",
+          "description": "Issued registration token number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when this CNIC was registered"
+        }
+      },
+      "required": ["tokenNumber"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized administrator or coordinator profile with role permissions.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Firebase Auth user identifier"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 150,
+          "description": "Administrator email address"
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Administrator full display name"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["superadmin", "coordinator"],
+          "description": "Role level determining administrative privileges"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp of admin profile"
+        }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "FormConfig": {
+      "title": "FormConfig",
+      "description": "Dynamic form configuration managing inputs on public registration page.",
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "string",
+          "description": "Configured form fields schema definition"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of last modification by administrator"
+        }
+      },
+      "required": ["fields"]
+    }
+  },
+  "firestore": {
+    "/donors/{donorId}": {
+      "schema": { "$ref": "#/entities/Donor" },
+      "description": "Private donor records with personal identifiable information, accessible only by authenticated administrators."
+    },
+    "/public_tokens/{tokenNumber}": {
+      "schema": { "$ref": "#/entities/PublicToken" },
+      "description": "Sanitized public token status lookup records. Direct single-document get only; list queries forbidden."
+    },
+    "/registered_cnics/{cnicKey}": {
+      "schema": { "$ref": "#/entities/RegisteredCnic" },
+      "description": "Privacy-safe unique index preventing duplicate CNIC registrations."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Administrative role registry determining superadmin and coordinator access."
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/FormConfig" },
+      "description": "System and form configuration accessible for public reading and admin modification."
+    }
+  }
+}
